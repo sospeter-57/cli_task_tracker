@@ -1,9 +1,8 @@
 package utils
 
 import (
-	"errors"
-
 	"cli_task_tracker/models"
+	"errors"
 )
 
 func UpdateTask(taskId uint32, description string) error {
@@ -14,12 +13,11 @@ func UpdateTask(taskId uint32, description string) error {
 		err = errors.New("Sorry, description can't be nil.")
 		return err
 	} else {
-		for _, task := range tasks {
-			if task.Id == taskId {
-				task.Description = description
-				
-				err = UpdateLogFile()
-				if err != nil {
+		for index := range tasks {
+			if tasks[index].Id == taskId {
+				tasks[index].Description = description
+
+				if err = UpdateLogFile(); err != nil {
 					return err
 				}
 				return nil
@@ -30,12 +28,14 @@ func UpdateTask(taskId uint32, description string) error {
 	}
 }
 
-
 func MarkInProgress(taskId uint32) error {
 
-	for _, task := range tasks {
-		if task.Id == taskId {
-			task.TaskStatus = models.StatusInProgress
+	for index := range tasks {
+		if tasks[index].Id == taskId {
+			tasks[index].TaskStatus = models.StatusInProgress
+			if err := UpdateLogFile(); err != nil {
+				return err
+			}
 			return nil
 		}
 	}
@@ -45,9 +45,12 @@ func MarkInProgress(taskId uint32) error {
 
 func MarkDone(taskId uint32) error {
 
-	for _, task := range tasks {
-		if task.Id == taskId {
-			task.TaskStatus = models.Done
+	for index := range tasks {
+		if tasks[index].Id == taskId {
+			tasks[index].TaskStatus = models.Done
+			if err := UpdateLogFile(); err != nil {
+				return err
+			}
 			return nil
 		}
 	}

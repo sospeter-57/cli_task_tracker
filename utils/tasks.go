@@ -1,13 +1,15 @@
 package utils
 
 import (
-	"os"
-	"io"
-	"encoding/json"
 	"cli_task_tracker/models"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
 )
 
-var tasks []models.Task 
+var tasks []models.Task
+
 const LogFile string = "logs.json"
 
 func InitializeTasks() error {
@@ -31,14 +33,16 @@ func InitializeTasks() error {
 }
 
 func UpdateLogFile() error {
-	file, err := os.OpenFile(LogFile, os.O_CREATE|os.O_RDWR, 0644)
+
+	file, err := os.OpenFile(LogFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("Sorry, and error occurred while opening the log file: %v", err)
 	}
-	defer file.Close()
-
 	encoder := json.NewEncoder(file)
-		err = encoder.Encode(tasks)
+	if err := encoder.Encode(tasks); err != nil {
+		file.Close()
+		return fmt.Errorf("Sorry, an error occurred while updating the log file: %v", err)
+	}
+	return nil
 
-		return nil
 }
